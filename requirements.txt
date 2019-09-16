@@ -1,0 +1,10 @@
+six==1.10.0
+requests==2.18.4
+Pillow
+sklearn
+opencv-python
+keras>=2.2.4
+tensorflow
+matplotlib>=3.0.2
+numpy>=1.14.6
+scipy>=1.1.0
