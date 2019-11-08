@@ -3,6 +3,7 @@ import os
 import numpy as np
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from tensorflow.python.keras.backend import set_session
 
 from verify.response import *
 from verify.utils import pretreatment
@@ -17,9 +18,11 @@ PATH = lambda p: os.path.abspath(
 )
 
 graph = tf.get_default_graph()
+sess = tf.Session()
 
 
 def load_keras_model():
+    set_session(sess)
     global textModel
     textModel = models.load_model(PATH('utils/model.v2.0.h5'))
     global imgModel
@@ -56,8 +59,10 @@ class VerifyBase64View(GenericViewSet):
         imgs = preprocess_input(imgs)
         text_list = []
         # 识别文字
+        global sess
         global graph
         with graph.as_default():
+            set_session(sess)
             label = textModel.predict(text)
         label = label.argmax()
         text = verify_titles[label]
@@ -73,6 +78,7 @@ class VerifyBase64View(GenericViewSet):
         text = get_text(img, offset=offset)
         if text.mean() < 0.95:
             with graph.as_default():
+                set_session(sess)
                 label = textModel.predict(text)
             label = label.argmax()
             text = verify_titles[label]
@@ -80,6 +86,7 @@ class VerifyBase64View(GenericViewSet):
         print("题目为{}".format(text_list))
         # 加载图片分类器
         with graph.as_default():
+            set_session(sess)
             labels = imgModel.predict(imgs)
         labels = labels.argmax(axis=1)
         results = []
